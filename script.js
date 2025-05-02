@@ -1,34 +1,49 @@
-import { loadTodos, saveTodos, renderTodos } from './module/main.js';
-window.addEventListener('DOMContentLoaded', () => {
-  renderTodos('all');
-});
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let currentFilter = 'all';
 
-window.addTodo = function () {
-  const input = document.getElementById('todo-input');
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+
+  const filtered = tasks.filter(task => {
+    if (currentFilter === 'active') return !task.done;
+    if (currentFilter === 'completed') return task.done;
+    return true;
+  });
+
+  filtered.forEach((task, index) => {
+    const li = document.createElement('li');
+    li.textContent = task.text;
+    if (task.done) li.classList.add('done');
+    li.onclick = () => toggleDone(index);
+    list.appendChild(li);
+  });
+}
+
+function addTask() {
+  const input = document.getElementById('taskInput');
   const text = input.value.trim();
-  if (text) {
-    const todos = loadTodos();
-    todos.push({ text, completed: false });
-    saveTodos(todos);
-    renderTodos('all');
-    input.value = '';
-  }
-};
+  if (!text) return;
 
-window.toggleTodo = function (index) {
-  const todos = loadTodos();
-  todos[index].completed = !todos[index].completed;
-  saveTodos(todos);
-  renderTodos('all');
-};
+  tasks.push({ text, done: false });
+  input.value = '';
+  saveTasks();
+  renderTasks();
+}
 
-window.deleteTodo = function (index) {
-  const todos = loadTodos();
-  todos.splice(index, 1);
-  saveTodos(todos);
-  renderTodos('all');
-};
+function toggleDone(index) {
+  tasks[index].done = !tasks[index].done;
+  saveTasks();
+  renderTasks();
+}
 
-window.filterTodos = function (filter) {
-  renderTodos(filter);
-};
+function setFilter(filter) {
+  currentFilter = filter;
+  renderTasks();
+}
+
+window.onload = renderTasks;
