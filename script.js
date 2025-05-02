@@ -1,6 +1,4 @@
-
 import { loadTodos, saveTodos, renderTodos } from './module/main.js';
-
 window.addEventListener('DOMContentLoaded', () => {
   renderTodos('all');
 });
